@@ -42,7 +42,6 @@ For Earth Watch chart (a) in M2+, plan to use **KeySeries** (or HadCRUT’s buil
 
 ## R2 object layout (M1 pipeline)
 
-Bucket: **`earth-watch`** (private). Upload uses the S3-compatible endpoint  
-`https://<R2_ACCOUNT_ID>.r2.cloudflarestorage.com` with bucket-scoped credentials (`R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY`).
+Bucket: **`earth-watch`** (private). The **Python Worker** writes via an **R2 binding** (`DATA` → `earth-watch`); no S3 API keys in GitHub or Wrangler.
 
-See [README](../README.md#cloudflare-r2-storage) for dashboard steps to create the token and GitHub secrets.
+See [deployment.md](deployment.md) and [README](../README.md).

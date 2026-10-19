@@ -22,7 +22,7 @@ class FixtureFetcher:
         self.fixture_name = fixture_name
         self.spec = inner.spec
 
-    def run(self, client=None):
+    def run(self, client=None, get_bytes=None):
         content = (FIXTURES / self.fixture_name).read_bytes()
         fetch = FetchResult.from_bytes(
             self.spec,

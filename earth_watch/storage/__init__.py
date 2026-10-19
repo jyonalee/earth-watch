@@ -1,19 +1,21 @@
 """Object storage backends."""
 
 from earth_watch.storage.r2 import (
-    R2Config,
-    R2Credentials,
-    credentials_from_env,
-    create_s3_client,
+    R2BucketBinding,
+    UploadItem,
+    UploadResult,
+    apply_raw_dedup,
     load_latest_manifest,
-    upload_pipeline_output,
+    plan_r2_uploads,
+    upload_to_r2,
 )
 
 __all__ = [
-    "R2Config",
-    "R2Credentials",
-    "credentials_from_env",
-    "create_s3_client",
+    "R2BucketBinding",
+    "UploadItem",
+    "UploadResult",
+    "apply_raw_dedup",
     "load_latest_manifest",
-    "upload_pipeline_output",
+    "plan_r2_uploads",
+    "upload_to_r2",
 ]

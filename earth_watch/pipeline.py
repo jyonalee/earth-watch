@@ -8,11 +8,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-import httpx
-
 from earth_watch import __version__
 from earth_watch.fetchers import BaseFetcher, GistempGlobalFetcher, gml_fetchers
-from earth_watch.fetchers.base import SourceRecord
+from earth_watch.fetchers.base import AsyncBytesFetcher, BytesFetcher, SourceRecord
 from earth_watch.layout import (
     aggregate_dated_key,
     aggregate_latest_key,
@@ -40,10 +38,27 @@ def default_fetchers() -> list[BaseFetcher]:
     return [*gml_fetchers(), GistempGlobalFetcher()]
 
 
+async def collect_records(
+    fetchers: list[BaseFetcher],
+    get_bytes: AsyncBytesFetcher,
+) -> list[SourceRecord]:
+    records: list[SourceRecord] = []
+    for fetcher in fetchers:
+        records.append(await fetcher.run_async(get_bytes))
+    return records
+
+
+def collect_records_sync(
+    fetchers: list[BaseFetcher],
+    get_bytes: BytesFetcher | None = None,
+) -> list[SourceRecord]:
+    return [fetcher.run(get_bytes=get_bytes) for fetcher in fetchers]
+
+
 def run_pipeline(
     output_dir: Path,
     fetchers: list[BaseFetcher] | None = None,
-    client: httpx.Client | None = None,
+    get_bytes: BytesFetcher | None = None,
     run_at: datetime | None = None,
 ) -> PipelineResult:
     output_dir = output_dir.resolve()
@@ -52,20 +67,10 @@ def run_pipeline(
     fetch_date = fetch_date_from_datetime(run_at)
 
     fetchers = fetchers or default_fetchers()
-    records: list[SourceRecord] = []
+    records = collect_records_sync(fetchers, get_bytes=get_bytes)
 
-    owns_client = client is None
-    if owns_client:
-        client = httpx.Client(timeout=120.0, follow_redirects=True)
-
-    try:
-        for fetcher in fetchers:
-            record = fetcher.run(client=client)
-            records.append(record)
-            _write_source_outputs(output_dir, record, fetch_date)
-    finally:
-        if owns_client and client is not None:
-            client.close()
+    for record in records:
+        _write_source_outputs(output_dir, record, fetch_date)
 
     manifest = build_manifest(records, run_id=run_id, fetch_date=fetch_date, run_at=run_at)
     manifests_dir = output_dir / "manifests"
@@ -149,3 +154,7 @@ def build_manifest(
         "run_at_utc": run_at_iso,
         "sources": sources,
     }
+
+
+def aggregate_json_bytes(record: SourceRecord) -> bytes:
+    return (json.dumps(record.aggregates, indent=2, sort_keys=True) + "\n").encode("utf-8")
