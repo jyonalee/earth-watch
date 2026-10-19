@@ -42,9 +42,11 @@ uv run pywrangler secret put RUN_SECRET
 2. **Create build** → connect GitHub repo `jyonalee/earth-watch`.
 3. Production branch: **`main`** (or merge PR #1 first).
 4. Build settings (typical for Python Workers):
-   - **Install command:** `uv sync && bash scripts/prepare_worker_bundle.sh`
+   - **Build command:** `uv sync` (installs `pywrangler` / dev deps; can be empty only if the Builds image already runs an equivalent install before deploy)
    - **Deploy command:** `uv run pywrangler deploy`
    - Root directory: repository root (where `wrangler.jsonc` lives).
+
+   Application code lives under `src/` next to `entry.py` so Wrangler bundles `earth_watch` with the Worker. Do **not** copy the package into `python_modules/` — `pywrangler deploy` rebuilds that directory from `pylock.toml` and would drop vendored copies.
 5. Ensure the build service account can deploy Workers and access the **`earth-watch`** R2 bucket binding (same account as the bucket).
 6. Do **not** store a Cloudflare API token in GitHub; Builds uses Cloudflare’s OAuth integration.
 
