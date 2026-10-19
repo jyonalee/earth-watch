@@ -39,3 +39,10 @@ GISTEMP’s main temperature table does **not** ship per-month uncertainty colum
    - NASA states this table was created in **2019** and is not the same as the v2.0 ensemble; use for historical reference only.
 
 For Earth Watch chart (a) in M2+, plan to use **KeySeries** (or HadCRUT’s built-in limits) rather than the stale `totalCI_ERA.csv` alone.
+
+## R2 object layout (M1 pipeline)
+
+Bucket: **`earth-watch`** (private). Upload uses the S3-compatible endpoint  
+`https://<R2_ACCOUNT_ID>.r2.cloudflarestorage.com` with bucket-scoped credentials (`R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY`).
+
+See [README](../README.md#cloudflare-r2-storage) for dashboard steps to create the token and GitHub secrets.

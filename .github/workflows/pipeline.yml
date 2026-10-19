@@ -2,6 +2,8 @@ name: Data pipeline
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
   pull_request:
     branches: [main]
   schedule:
@@ -28,10 +30,15 @@ jobs:
           name: earth-watch-data
           path: output/
           retention-days: 90
-      - name: Upload to R2 (optional)
+      - name: Upload to R2
+        if: >-
+          github.event_name == 'workflow_dispatch' ||
+          github.event_name == 'schedule' ||
+          (github.event_name == 'push' && github.ref == 'refs/heads/main')
         env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           R2_BUCKET: earth-watch
           OUTPUT_DIR: output
         run: python scripts/upload_r2.py

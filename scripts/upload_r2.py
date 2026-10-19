@@ -3,21 +3,29 @@
 
 from __future__ import annotations
 
+import json
 import os
-import subprocess
 import sys
 from pathlib import Path
 
+from earth_watch.storage.r2 import (
+    apply_raw_dedup,
+    credentials_from_env,
+    create_s3_client,
+    load_latest_manifest,
+    upload_pipeline_output,
+)
+
 
 def main() -> int:
-    token = os.environ.get("CLOUDFLARE_API_TOKEN")
-    account_id = os.environ.get("CLOUDFLARE_ACCOUNT_ID")
-    bucket = os.environ.get("R2_BUCKET", "earth-watch")
+    bucket = os.environ.get("R2_BUCKET", "earth-watch").strip()
     output_dir = Path(os.environ.get("OUTPUT_DIR", "output"))
 
-    if not token or not account_id:
+    credentials = credentials_from_env()
+    if credentials is None:
         print(
-            "Skipping R2 upload: CLOUDFLARE_API_TOKEN and/or CLOUDFLARE_ACCOUNT_ID not set.",
+            "Skipping R2 upload: R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, and/or "
+            "R2_SECRET_ACCESS_KEY not set.",
             file=sys.stderr,
         )
         return 0
@@ -26,39 +34,28 @@ def main() -> int:
         print(f"R2 upload failed: output directory missing: {output_dir}", file=sys.stderr)
         return 1
 
-    env = os.environ.copy()
-    env["CLOUDFLARE_API_TOKEN"] = token
-    env["CLOUDFLARE_ACCOUNT_ID"] = account_id
+    manifests_dir = output_dir / "manifests"
+    latest_local = manifests_dir / "latest.json"
+    if not latest_local.is_file():
+        print(f"R2 upload failed: missing local manifest {latest_local}", file=sys.stderr)
+        return 1
 
-    uploaded = 0
-    for path in sorted(output_dir.rglob("*")):
-        if not path.is_file():
-            continue
-        key = path.relative_to(output_dir).as_posix()
-        object_name = f"{bucket}/{key}"
-        result = subprocess.run(
-            [
-                "npx",
-                "--yes",
-                "wrangler@3",
-                "r2",
-                "object",
-                "put",
-                object_name,
-                f"--file={path}",
-            ],
-            env=env,
-            capture_output=True,
-            text=True,
-        )
-        if result.returncode != 0:
-            print(result.stdout, file=sys.stderr)
-            print(result.stderr, file=sys.stderr)
-            print(f"R2 upload failed for {key}", file=sys.stderr)
-            return result.returncode
-        uploaded += 1
+    manifest = json.loads(latest_local.read_text(encoding="utf-8"))
+    client = create_s3_client(credentials)
+    previous = load_latest_manifest(client, bucket)
+    manifest = apply_raw_dedup(manifest, previous)
 
-    print(f"Uploaded {uploaded} files to R2 bucket {bucket}")
+    run_id = manifest["run_id"]
+    run_path = manifests_dir / f"{run_id}.json"
+    payload = json.dumps(manifest, indent=2, sort_keys=True) + "\n"
+    run_path.write_text(payload, encoding="utf-8")
+    latest_local.write_text(payload, encoding="utf-8")
+
+    result = upload_pipeline_output(client, bucket, output_dir, manifest)
+    print(
+        f"R2 upload complete: bucket={bucket} uploaded={result.uploaded} "
+        f"skipped={result.skipped} manifest={result.manifest_run_key}"
+    )
     return 0
 
 
