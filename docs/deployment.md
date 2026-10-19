@@ -33,8 +33,9 @@ Bucket **`earth-watch`** already exists (ENAM). No API token is required for the
 
 ### 3. Workers Builds (GitHub → Cloudflare)
 
-1. Cloudflare dashboard → **Workers & Pages** → **Workers Builds** (or your account’s Builds UI).
-2. **Create build** → connect GitHub repo `jyonalee/earth-watch`.
+1. **New Worker:** Cloudflare dashboard → **Workers & Pages** → **Create application** → **GitHub** → select repo `jyonalee/earth-watch`.
+2. **Existing Worker:** open the Worker → **Settings** → **Builds** → **Connect** ([Workers Builds](https://developers.cloudflare.com/workers/ci-cd/builds/)).
+   After connecting or reconnecting, push a commit to **`main`** to start a build (connecting alone does not build).
 3. Root directory: repository root (where `wrangler.jsonc` lives).
 
    Application code lives under `src/` next to `entry.py` so Wrangler bundles `earth_watch` with the Worker. Do **not** copy the package into `python_modules/` — `pywrangler deploy` rebuilds that directory from `pylock.toml` and would drop vendored copies.
