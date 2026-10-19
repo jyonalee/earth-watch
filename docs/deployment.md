@@ -29,26 +29,28 @@ Bucket **`earth-watch`** already exists (ENAM). No API token is required for the
 
 ### 2. Worker secrets
 
-Set a manual-run shared secret (not in git):
-
-```bash
-cd /path/to/earth-watch
-uv run pywrangler secret put RUN_SECRET
-```
+**Production:** set `RUN_SECRET` after the first successful deploy (see [Workers Builds settings](#workers-builds-settings)). **Local dev:** `.dev.vars` or `uv run pywrangler secret put RUN_SECRET` — never commit the value.
 
 ### 3. Workers Builds (GitHub → Cloudflare)
 
 1. Cloudflare dashboard → **Workers & Pages** → **Workers Builds** (or your account’s Builds UI).
 2. **Create build** → connect GitHub repo `jyonalee/earth-watch`.
-3. Production branch: **`main`** (or merge PR #1 first).
-4. Build settings (typical for Python Workers):
-   - **Build command:** `uv sync` (installs `pywrangler` / dev deps; can be empty only if the Builds image already runs an equivalent install before deploy)
-   - **Deploy command:** `uv run pywrangler deploy`
-   - Root directory: repository root (where `wrangler.jsonc` lives).
+3. Root directory: repository root (where `wrangler.jsonc` lives).
 
    Application code lives under `src/` next to `entry.py` so Wrangler bundles `earth_watch` with the Worker. Do **not** copy the package into `python_modules/` — `pywrangler deploy` rebuilds that directory from `pylock.toml` and would drop vendored copies.
-5. Ensure the build service account can deploy Workers and access the **`earth-watch`** R2 bucket binding (same account as the bucket).
-6. Do **not** store a Cloudflare API token in GitHub; Builds uses Cloudflare’s OAuth integration.
+4. Ensure the build service account can deploy Workers and access the **`earth-watch`** R2 bucket binding (same account as the bucket).
+5. Do **not** store a Cloudflare API token in GitHub; Builds uses Cloudflare’s OAuth integration.
+
+#### Workers Builds settings
+
+- **Build command:** `uv sync`
+- **Deploy command:** `uv run pywrangler deploy`
+- **Production branch:** `main`
+- **Worker name:** must equal `name` in `wrangler.jsonc` (`earth-watch-pipeline`)
+
+If a PR changes the build or deploy commands, update these Workers Builds settings **before merging**.
+
+After the **first successful deploy**, set **`RUN_SECRET`** as a **runtime secret** (Worker → **Settings** → **Variables & Secrets**). Generate with `openssl rand -hex 32`; never commit it.
 
 ### 4. Verify
 
