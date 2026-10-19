@@ -33,6 +33,8 @@ Bucket **`earth-watch`** already exists (ENAM). No API token is required for the
 
 ### 3. Workers Builds (GitHub → Cloudflare)
 
+**Prerequisite:** the GitHub app **Cloudflare Workers and Pages** must have repository access to `jyonalee/earth-watch` ([configure installations](https://github.com/settings/installations)). Without it, Cloudflare build settings show **This project is disconnected from your Git account** and pushes to **`main`** start no build.
+
 1. **New Worker:** Cloudflare dashboard → **Workers & Pages** → **Create application** → **GitHub** → select repo `jyonalee/earth-watch`.
 2. **Existing Worker:** open the Worker → **Settings** → **Builds** → **Connect** ([Workers Builds](https://developers.cloudflare.com/workers/ci-cd/builds/)).
    After connecting or reconnecting, push a commit to **`main`** to start a build (connecting alone does not build).
@@ -48,6 +50,8 @@ Bucket **`earth-watch`** already exists (ENAM). No API token is required for the
 - **Deploy command:** `uv run pywrangler deploy`
 - **Production branch:** `main`
 - **Worker name:** must equal `name` in `wrangler.jsonc` (`earth-watch-pipeline`)
+
+Keep **Builds for non-production branches** unchecked unless the **Version command** is a non-deploying preview upload. If the Version command is `uv run pywrangler deploy`, a push to any branch deploys to production.
 
 If a PR changes the build or deploy commands, update these Workers Builds settings **before merging**.
 
