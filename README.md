@@ -10,7 +10,7 @@ Dataset URLs and GISTEMP uncertainty: [docs/sources.md](docs/sources.md).
 
 | Path | Role |
 |------|------|
-| `earth_watch/` | Shared pipeline (fetch, validate, aggregate, R2 layout) — stdlib only |
+| `src/earth_watch/` | Shared pipeline (fetch, validate, aggregate, R2 layout) — stdlib only |
 | `src/entry.py` | Cloudflare Worker entry (`scheduled` + `/run`) |
 | `wrangler.jsonc` | Worker name, cron, R2 binding, CPU limit |
 | `tests/` | Offline pytest (fixtures + mocked R2 binding) |
@@ -30,7 +30,6 @@ pytest -q
 
 ```bash
 uv sync
-bash scripts/prepare_worker_bundle.sh   # vendor earth_watch into python_modules/
 cp .dev.vars.example .dev.vars          # set RUN_SECRET for POST /run
 uv run pywrangler dev --test-scheduled
 curl "http://localhost:8787/cdn-cgi/local/scheduled?cron=0+6+*+*+1"
