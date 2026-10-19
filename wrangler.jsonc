@@ -1,0 +1,19 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "earth-watch-pipeline",
+  "main": "src/entry.py",
+  "compatibility_date": "2026-10-19",
+  "compatibility_flags": ["python_workers"],
+  "limits": {
+    "cpu_ms": 120000
+  },
+  "triggers": {
+    "crons": ["0 6 * * 1"]
+  },
+  "r2_buckets": [
+    {
+      "binding": "DATA",
+      "bucket_name": "earth-watch"
+    }
+  ]
+}

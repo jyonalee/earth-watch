@@ -1,0 +1,2 @@
+# Copy to .dev.vars for local `pywrangler dev` (never commit .dev.vars)
+RUN_SECRET=replace-with-long-random-string
