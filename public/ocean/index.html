@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Earth Watch — Ocean heat</title>
+  <link rel="stylesheet" href="/ocean/styles.css">
+</head>
+<body>
+  <main>
+    <header>
+      <p class="crumb"><a href="/">Earth Watch</a> / Chart (c)</p>
+      <nav class="nav">
+        <a href="/warming/">Chart (a)</a> · <a href="/airborne/">Chart (b)</a> · <span>Chart (c)</span>
+      </nav>
+      <h1>Where is the heat going?</h1>
+      <p class="subtitle">Ocean heat content (NCEI) and global sea surface temperature anomaly (Climate at a Glance).</p>
+    </header>
+
+    <section id="status" class="status" aria-live="polite">Loading data…</section>
+
+    <figure>
+      <canvas id="chart" width="960" height="440" role="img" aria-label="Ocean heat content and SST"></canvas>
+      <figcaption id="chart-note"></figcaption>
+    </figure>
+
+    <section>
+      <h2>Facts</h2>
+      <ul id="facts"></ul>
+    </section>
+
+    <section>
+      <h2>Read</h2>
+      <p id="read"></p>
+    </section>
+
+    <section>
+      <h2>Sources and licenses</h2>
+      <ul id="sources"></ul>
+      <p id="conversion-note" class="small"></p>
+    </section>
+  </main>
+  <script src="/ocean/chart.js" defer></script>
+</body>
+</html>

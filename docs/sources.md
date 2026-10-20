@@ -73,6 +73,16 @@ Design: [m3-design.md](m3-design.md).
 
 Chart (b) uses this global series (not Mauna Loa `co2_gr_mlo.csv`) for airborne fraction vs GCB emissions.
 
+## NOAA NCEI — ocean heat & global SST (M4)
+
+| Series | URL | Format |
+|--------|-----|--------|
+| Global OHC 0–700 m (yearly) | https://www.ncei.noaa.gov/data/oceans/woa/DATA_ANALYSIS/3M_HEAT_CONTENT/DATA/basin/yearly/h22-w0-700m.dat | ASCII: `YEAR WO WOse …` (10²² J) |
+| Global OHC 0–2000 m (yearly) | https://www.ncei.noaa.gov/data/oceans/woa/DATA_ANALYSIS/3M_HEAT_CONTENT/DATA/basin/yearly/h22-w0-2000m.dat | Same |
+| Global ocean SST anomaly (annual) | https://www.ncei.noaa.gov/access/monitoring/climate-at-a-glance/global/time-series/globe/ocean/ytd/12/1980-2030.json | NCEI Climate at a Glance JSON (`data` keys `YYYY`) |
+
+Design: [m4-design.md](m4-design.md). Chart (c) uses monthly CAG JSON and derives annual SST; anomalies vs **1901–2000** for global ocean.
+
 ## R2 object layout (M1 pipeline)
 
 Bucket: **`earth-watch`** (private). The **Python Worker** writes via an **R2 binding** (`DATA` → `earth-watch`); no S3 API keys in GitHub or Wrangler.
