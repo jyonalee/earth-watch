@@ -33,6 +33,41 @@ body {
   color: #b00020;
 }
 
+.chart-cards {
+  list-style: none;
+  padding: 0;
+}
+
+.chart-card {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  margin: 1rem 0;
+  padding: 1rem 1.1rem;
+}
+
+.chart-card h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.15rem;
+}
+
+.read-snippet {
+  margin: 0.35rem 0;
+}
+
+.chart-card .meta {
+  font-size: 0.9rem;
+  color: #555;
+}
+
+@media (prefers-color-scheme: dark) {
+  .chart-card {
+    border-color: #444;
+  }
+  .chart-card .meta {
+    color: #aaa;
+  }
+}
+
 #chart {
   width: 100%;
   max-width: 960px;

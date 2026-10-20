@@ -19,8 +19,10 @@ from earth_watch.http_routes import (
     health_json_response,
     is_public_api_path,
 )
+from earth_watch.health import health_from_manifest
 from earth_watch.layout import chart_a_latest_key, chart_b_latest_key, chart_c_latest_key
 from earth_watch.run import run_pipeline_to_r2
+from earth_watch.storage.r2 import load_latest_manifest
 from earth_watch.worker_fetch import js_fetch_bytes
 
 
@@ -32,7 +34,8 @@ class Default(WorkerEntrypoint):
         path = urlparse(request.url).path
 
         if path == HEALTH_API_PATH:
-            return health_json_response()
+            manifest = await load_latest_manifest(self.env.DATA)
+            return health_json_response(health_from_manifest(manifest))
 
         if path == CHART_A_API_PATH:
             obj = await self.env.DATA.get(chart_a_latest_key())

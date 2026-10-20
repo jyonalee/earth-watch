@@ -69,3 +69,12 @@ def test_build_chart_c_payload():
     assert payload["facts"]
     assert payload["read"]
     assert "through complete year 2024" in payload["facts"][0].lower()
+    ohc_trend_fact = payload["facts"][1]
+    assert "zj yr" in ohc_trend_fact.lower()
+    assert "95% ci" in ohc_trend_fact.lower()
+    assert "10²² j decade" not in ohc_trend_fact.lower()
+    assert "w m⁻²" in ohc_trend_fact.lower() or "w m" in ohc_trend_fact.lower()
+    long_trend = payload["ohc"]["0_2000m"]["trends"]["long"]
+    assert "ci95_low_zj_per_year" in long_trend
+    assert long_trend["ci95_low_zj_per_year"] <= long_trend["slope_zj_per_year"]
+    assert long_trend["ci95_high_zj_per_year"] >= long_trend["slope_zj_per_year"]

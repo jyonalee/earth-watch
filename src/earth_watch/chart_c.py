@@ -5,6 +5,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from typing import Any, Sequence
 
+from earth_watch.chart_meta import data_as_of_block
 from earth_watch.fetchers.base import SourceRecord
 from earth_watch.ocean_physics import (
     HEATING_RATE_CITATION,
@@ -15,6 +16,7 @@ from earth_watch.sources import (
     NCEI_CAG_OCEAN_ANNUAL,
     NCEI_OHC_0_2000M_YEARLY,
     NCEI_OHC_0_700M_YEARLY,
+    cag_ocean_annual_url,
 )
 from earth_watch.trends.ols import TrendFit, compare_slopes, fitted_line_points, linear_trend
 
@@ -96,6 +98,14 @@ def _fit_summary(fit: TrendFit, *, values_are_ohc: bool) -> dict[str, Any]:
     }
     if values_are_ohc:
         out["slope_zj_per_year"] = round(ohc_slope_1e22j_per_year_to_zj_per_year(fit.slope_per_year_c), 4)
+        out["ci95_low_zj_per_year"] = round(
+            ohc_slope_1e22j_per_year_to_zj_per_year(fit.ci95_low_per_decade_c / 10.0),
+            4,
+        )
+        out["ci95_high_zj_per_year"] = round(
+            ohc_slope_1e22j_per_year_to_zj_per_year(fit.ci95_high_per_decade_c / 10.0),
+            4,
+        )
         out["heating_rate_w_m2"] = round(ohc_slope_1e22j_per_year_to_w_m2(fit.slope_per_year_c), 4)
     return out
 
@@ -199,9 +209,9 @@ def build_chart_c_payload(
         (
             f"0–2000 m OHC trend {trend2000['long']['year_start']}–{trend2000['long']['year_end']}: "
             f"{trend2000['long']['slope_zj_per_year']:.2f} ZJ yr⁻¹ "
-            f"({trend2000['long']['heating_rate_w_m2']:.3f} W m⁻²); "
-            f"95% CI on slope {trend2000['long']['ci95_low_per_decade']:.2f} to "
-            f"{trend2000['long']['ci95_high_per_decade']:.2f} (10²² J decade⁻¹)."
+            f"(95% CI {trend2000['long']['ci95_low_zj_per_year']:.2f} to "
+            f"{trend2000['long']['ci95_high_zj_per_year']:.2f} ZJ yr⁻¹), "
+            f"{trend2000['long']['heating_rate_w_m2']:.3f} W m⁻²."
         ),
         (
             f"Global ocean SST anomaly (1901–2000 baseline): latest annual {sst_annual[-1]['anomaly_c']:.2f} °C "
@@ -227,11 +237,15 @@ def build_chart_c_payload(
             "recent and long-window OHC trend uncertainties overlap, so clear acceleration is not established."
         )
 
+    sst_meta = dict(_SST_META)
+    sst_meta["url"] = cag_ocean_annual_url(run_at.astimezone(timezone.utc).year)
+
     return {
         "chart": "c_ocean_heat",
         "last_complete_year": last_complete,
+        "data_as_of": data_as_of_block(last_complete),
         "heating_rate_citation": HEATING_RATE_CITATION,
-        "sources": [_OHC_700_META, _OHC_2000_META, _SST_META],
+        "sources": [_OHC_700_META, _OHC_2000_META, sst_meta],
         "ohc": {
             "units": "10^22 J",
             "0_700m": {"annual": ohc700, "trends": trend700},

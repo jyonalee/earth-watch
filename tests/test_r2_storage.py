@@ -14,7 +14,7 @@ from earth_watch.layout import (
     raw_object_key,
     run_id_from_datetime,
 )
-from earth_watch.pipeline import aggregate_json_bytes, build_manifest
+from earth_watch.pipeline import aggregate_json_bytes, build_manifest, outcomes_from_records
 from earth_watch.fetchers.base import FetchResult
 from earth_watch.fetchers.gml_co2 import GmlCo2Fetcher
 from earth_watch.sources import GML_CO2_GROWTH
@@ -77,11 +77,12 @@ def _sample_record() -> FetchResult:
 def test_apply_raw_dedup_reuses_key_when_sha_matches():
     fetch = _sample_record()
     record = GmlCo2Fetcher("growth").process(fetch)
+    run_at = datetime(2026, 10, 19, 12, 0, tzinfo=timezone.utc)
     manifest = build_manifest(
-        [record],
+        outcomes_from_records([record], run_at=run_at),
         run_id="20261019T120000Z",
         fetch_date="2026-10-19",
-        run_at=datetime(2026, 10, 19, 12, 0, tzinfo=timezone.utc),
+        run_at=run_at,
     )
     previous = {
         "sources": [
@@ -101,11 +102,12 @@ def test_apply_raw_dedup_reuses_key_when_sha_matches():
 def test_plan_r2_uploads_skips_raw_put_when_flagged():
     fetch = _sample_record()
     record = GmlCo2Fetcher("growth").process(fetch)
+    run_at = datetime(2026, 10, 19, 12, 0, tzinfo=timezone.utc)
     manifest = build_manifest(
-        [record],
+        outcomes_from_records([record], run_at=run_at),
         run_id="20261019T120000Z",
         fetch_date="2026-10-19",
-        run_at=datetime(2026, 10, 19, 12, 0, tzinfo=timezone.utc),
+        run_at=run_at,
     )
     manifest["sources"][0]["raw_upload_skipped"] = True
     manifest["sources"][0]["r2"]["raw"] = "raw/gml_co2_gr_mlo/2026-10-12/co2_gr_mlo.csv"
@@ -124,11 +126,12 @@ def test_upload_to_r2_binding():
 async def _test_upload_to_r2_binding():
     fetch = _sample_record()
     record = GmlCo2Fetcher("growth").process(fetch)
+    run_at = datetime(2026, 10, 19, 12, 0, tzinfo=timezone.utc)
     manifest = build_manifest(
-        [record],
+        outcomes_from_records([record], run_at=run_at),
         run_id="20261019T120000Z",
         fetch_date="2026-10-19",
-        run_at=datetime(2026, 10, 19, 12, 0, tzinfo=timezone.utc),
+        run_at=run_at,
     )
     bucket = MockBucket()
     result = await upload_to_r2(bucket, manifest, [record])

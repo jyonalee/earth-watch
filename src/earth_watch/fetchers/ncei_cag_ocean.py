@@ -13,7 +13,13 @@ from earth_watch.fetchers.base import (
     SourceRecord,
     SourceValidationError,
 )
-from earth_watch.sources import NCEI_CAG_OCEAN_ANNUAL, SourceSpec
+from earth_watch.http_get import fetch_http
+from earth_watch.sources import (
+    NCEI_CAG_OCEAN_ANNUAL,
+    SourceSpec,
+    cag_annual_end_years_to_try,
+    cag_ocean_annual_url,
+)
 
 _CAG_BASE = (
     "https://www.ncei.noaa.gov/access/monitoring/climate-at-a-glance/global/time-series/globe/ocean"
@@ -94,9 +100,30 @@ class NceiCagOceanSstFetcher(BaseFetcher):
         return out
 
     async def run_async(self, get_bytes: AsyncBytesFetcher) -> SourceRecord:
-        annual_content = await get_bytes(self.spec.url)
         fetched_at = datetime.now(timezone.utc)
-        fetch = FetchResult.from_bytes(self.spec, annual_content, fetched_at)
+        utc_year = fetched_at.year
+        annual_content: bytes | None = None
+        last_modified: str | None = None
+        end_years = cag_annual_end_years_to_try(utc_year)
+        for end_year in end_years:
+            url = cag_ocean_annual_url(end_year)
+            try:
+                http = await fetch_http(url, get_bytes)
+            except SourceValidationError:
+                if end_year == utc_year - 1:
+                    raise
+                continue
+            annual_content = http.content
+            last_modified = http.last_modified
+            break
+        if annual_content is None:
+            raise SourceValidationError(f"{self.spec.source_id}: annual fetch failed")
+        fetch = FetchResult.from_bytes(
+            self.spec,
+            annual_content,
+            fetched_at,
+            http_last_modified=last_modified,
+        )
         frame = self.parse(annual_content)
         run_year = datetime.now(timezone.utc).year - 1
         monthly_rows: list[dict[str, Any]] = []

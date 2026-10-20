@@ -116,7 +116,8 @@ async function main() {
   const status = document.getElementById("status");
   try {
     const data = await loadChartData();
-    status.textContent = `Last complete year: ${data.last_complete_year}.`;
+    status.textContent =
+      data.data_as_of?.label || `Last complete year: ${data.last_complete_year}.`;
     drawChart(document.getElementById("chart"), data);
     renderLists(data);
   } catch (err) {

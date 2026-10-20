@@ -140,8 +140,11 @@ async function main() {
   const status = document.getElementById("status");
   try {
     const data = await loadChartData();
-    status.textContent =
-      `Last complete year: ${data.series.map((s) => s.last_complete_year ?? s.data_as_of_year).join(", ")} (per series).`;
+    const asOf = data.data_as_of?.label;
+    const years = data.series.map((s) => s.last_complete_year ?? s.data_as_of_year).join(", ");
+    status.textContent = asOf
+      ? `${asOf} (series years: ${years}).`
+      : `Last complete year: ${years} (per series).`;
     drawChart(document.getElementById("chart"), data);
     renderLists(data);
   } catch (err) {

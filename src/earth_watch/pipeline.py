@@ -6,9 +6,11 @@ import json
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Sequence
 
 from earth_watch import __version__
+from earth_watch.freshness import cadence_for_source
+from earth_watch.source_collect import SourceOutcome, collect_source_outcomes_sync
 from earth_watch.fetchers import (
     BaseFetcher,
     BerkeleyLandOceanFetcher,
@@ -89,12 +91,18 @@ def run_pipeline(
     fetch_date = fetch_date_from_datetime(run_at)
 
     fetchers = fetchers or default_fetchers()
-    records = collect_records_sync(fetchers, get_bytes=get_bytes)
+    outcomes = collect_source_outcomes_sync(fetchers, get_bytes=get_bytes, run_at=run_at)
+    for outcome in outcomes:
+        if outcome.record is not None:
+            _write_source_outputs(output_dir, outcome.record, fetch_date)
 
-    for record in records:
-        _write_source_outputs(output_dir, record, fetch_date)
-
-    manifest = build_manifest(records, run_id=run_id, fetch_date=fetch_date, run_at=run_at)
+    manifest = build_manifest(
+        outcomes,
+        run_id=run_id,
+        fetch_date=fetch_date,
+        run_at=run_at,
+    )
+    records = [o.record for o in outcomes if o.record is not None]
     manifests_dir = output_dir / "manifests"
     manifests_dir.mkdir(parents=True, exist_ok=True)
     manifest_path = manifests_dir / f"{run_id}.json"
@@ -134,41 +142,87 @@ def _write_source_outputs(output_dir: Path, record: SourceRecord, fetch_date: st
     agg_latest_path.write_text(payload, encoding="utf-8")
 
 
+def _previous_source_entry(
+    previous_manifest: dict[str, Any] | None, source_id: str
+) -> dict[str, Any] | None:
+    if not previous_manifest:
+        return None
+    for entry in previous_manifest.get("sources", []):
+        if entry.get("source_id") == source_id:
+            return entry
+    return None
+
+
 def build_manifest(
-    records: list[SourceRecord],
+    outcomes: Sequence[SourceOutcome],
     *,
     run_id: str,
     fetch_date: str,
     run_at: datetime,
+    previous_manifest: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     run_at_iso = run_at.astimezone(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
     sources = []
-    for record in records:
-        source_id = record.spec.source_id
-        original_name = storage_filename_for_spec(record.spec)
-        fetched = record.fetch.fetched_at.replace(microsecond=0).isoformat().replace("+00:00", "Z")
-        raw_rel = f"raw/{source_id}/{fetch_date}/{original_name}"
-        agg_rel = f"aggregates/{fetch_date}/{source_id}.json"
-        sources.append(
-            {
-                "source_id": source_id,
-                "url": record.spec.url,
-                "version": record.spec.version,
-                "original_filename": original_name,
-                "fetched_at_utc": fetched,
-                "sha256": record.fetch.sha256,
-                "raw_upload_skipped": False,
-                "local": {
-                    "raw": raw_rel,
-                    "aggregate": agg_rel,
-                },
-                "r2": {
-                    "raw": raw_object_key(source_id, fetch_date, original_name),
-                    "aggregate_latest": aggregate_latest_key(source_id),
-                    "aggregate_dated": aggregate_dated_key(source_id, fetch_date),
-                },
-            }
+    for outcome in outcomes:
+        source_id = outcome.spec.source_id
+        original_name = storage_filename_for_spec(outcome.spec)
+        prev = _previous_source_entry(previous_manifest, source_id)
+        cadence = cadence_for_source(source_id)
+        last_point = (
+            outcome.last_data_point.as_dict() if outcome.last_data_point is not None else None
         )
+        base: dict[str, Any] = {
+            "source_id": source_id,
+            "status": outcome.status,
+            "error": outcome.error,
+            "cadence": cadence,
+            "last_data_point": last_point,
+            "http_last_modified": outcome.http_last_modified,
+            "stale": outcome.stale,
+            "url": outcome.spec.url,
+            "version": outcome.spec.version,
+            "original_filename": original_name,
+            "recovered_from_previous": outcome.recovered_from_previous,
+        }
+        if outcome.record is not None:
+            record = outcome.record
+            fetched = record.fetch.fetched_at.replace(microsecond=0).isoformat().replace("+00:00", "Z")
+            raw_rel = f"raw/{source_id}/{fetch_date}/{original_name}"
+            agg_rel = f"aggregates/{fetch_date}/{source_id}.json"
+            base.update(
+                {
+                    "fetched_at_utc": fetched,
+                    "sha256": record.fetch.sha256,
+                    "raw_upload_skipped": False,
+                    "local": {"raw": raw_rel, "aggregate": agg_rel},
+                    "r2": {
+                        "raw": raw_object_key(source_id, fetch_date, original_name),
+                        "aggregate_latest": aggregate_latest_key(source_id),
+                        "aggregate_dated": aggregate_dated_key(source_id, fetch_date),
+                    },
+                }
+            )
+        elif prev:
+            base.update(
+                {
+                    "fetched_at_utc": prev.get("fetched_at_utc"),
+                    "sha256": prev.get("sha256"),
+                    "raw_upload_skipped": True,
+                    "local": prev.get("local"),
+                    "r2": prev.get("r2"),
+                }
+            )
+        else:
+            base.update(
+                {
+                    "fetched_at_utc": None,
+                    "sha256": None,
+                    "raw_upload_skipped": True,
+                    "local": None,
+                    "r2": None,
+                }
+            )
+        sources.append(base)
     return {
         "pipeline_version": __version__,
         "run_id": run_id,
@@ -176,6 +230,12 @@ def build_manifest(
         "run_at_utc": run_at_iso,
         "sources": sources,
     }
+
+
+def outcomes_from_records(records: Sequence[SourceRecord], *, run_at: datetime) -> list[SourceOutcome]:
+    from earth_watch.source_collect import _outcome_from_record
+
+    return [_outcome_from_record(record, run_at=run_at) for record in records]
 
 
 def aggregate_json_bytes(record: SourceRecord) -> bytes:
