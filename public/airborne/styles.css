@@ -1,0 +1,17 @@
+@import url("/warming/styles.css");
+
+.nav {
+  font-size: 0.95rem;
+  margin-bottom: 0.75rem;
+}
+
+.small {
+  font-size: 0.85rem;
+  color: #555;
+}
+
+@media (prefers-color-scheme: dark) {
+  .small {
+    color: #aaa;
+  }
+}

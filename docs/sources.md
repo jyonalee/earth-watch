@@ -57,6 +57,22 @@ Version label: **HadCRUT.5.1.0.0**. Native anomalies vs **1961–1990**; chart (
 
 Citation: Rohde & Hausfather, ESSD 2020 (see file header). Data use terms: https://berkeleyearth.org/data/
 
+## Global Carbon Budget 2025 (M3)
+
+| Series | URL | Format |
+|--------|-----|--------|
+| Global budget workbook | https://globalcarbonbudget.org/download/2341/ | XLSX; sheet **Global Carbon Budget** (fossil and land-use emissions in GtC/yr) |
+
+Design: [m3-design.md](m3-design.md).
+
+## NOAA GML — global CO₂ growth (M3)
+
+| Series | URL | Format |
+|--------|-----|--------|
+| Global annual increase | https://gml.noaa.gov/webdata/ccgg/trends/co2/co2_gr_gl.txt | Whitespace columns: `year`, `growth_ppm`, `unc_ppm` (after `#` headers) |
+
+Chart (b) uses this global series (not Mauna Loa `co2_gr_mlo.csv`) for airborne fraction vs GCB emissions.
+
 ## R2 object layout (M1 pipeline)
 
 Bucket: **`earth-watch`** (private). The **Python Worker** writes via an **R2 binding** (`DATA` → `earth-watch`); no S3 API keys in GitHub or Wrangler.

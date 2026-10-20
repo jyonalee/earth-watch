@@ -1,10 +1,10 @@
 # Earth Watch
 
-Personal climate dashboard (Phase 1). Milestone **M1** fetches NOAA GML Mauna Loa CO₂ and NASA GISTEMP v4 global temperature; **M2** adds HadCRUT5, Berkeley Earth, warming trends, and chart (a) with public `GET /api/chart-a.json` plus a static dashboard at `/warming/`.
+Personal climate dashboard (Phase 1). Milestone **M1** fetches NOAA GML Mauna Loa CO₂ and NASA GISTEMP v4 global temperature; **M2** adds HadCRUT5, Berkeley Earth, warming trends, and chart (a) (`GET /api/chart-a.json`, `/warming/`). **M3** adds Global Carbon Budget + global CO₂ growth, airborne fraction, and chart (b) (`GET /api/chart-b.json`, `/airborne/`).
 
 **Runtime:** Python **Worker** on a weekly cron (and optional authenticated `POST /run`). See [docs/deployment.md](docs/deployment.md) for Workers Builds and secrets. M2 design: [docs/m2-design.md](docs/m2-design.md).
 
-Dataset URLs and GISTEMP uncertainty: [docs/sources.md](docs/sources.md).
+Dataset URLs: [docs/sources.md](docs/sources.md). M3 design: [docs/m3-design.md](docs/m3-design.md).
 
 ## Repository layout
 

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Earth Watch — Airborne fraction</title>
+  <link rel="stylesheet" href="/airborne/styles.css">
+</head>
+<body>
+  <main>
+    <header>
+      <p class="crumb"><a href="/">Earth Watch</a> / Chart (b)</p>
+      <nav class="nav">
+        <a href="/warming/">Chart (a): warming</a>
+        <span aria-hidden="true"> · </span>
+        <span>Chart (b): airborne fraction</span>
+      </nav>
+      <h1>Are carbon sinks keeping up?</h1>
+      <p class="subtitle">Airborne fraction = atmospheric CO₂ growth ÷ (fossil + land-use emissions).</p>
+    </header>
+
+    <section id="status" class="status" aria-live="polite">Loading data…</section>
+
+    <figure>
+      <canvas id="chart" width="960" height="420" role="img" aria-label="Airborne fraction over time"></canvas>
+      <figcaption id="chart-note"></figcaption>
+    </figure>
+
+    <section>
+      <h2>Facts</h2>
+      <ul id="facts"></ul>
+    </section>
+
+    <section>
+      <h2>Read</h2>
+      <p id="read"></p>
+    </section>
+
+    <section>
+      <h2>Sources and licenses</h2>
+      <ul id="sources"></ul>
+      <p id="conversion-note" class="small"></p>
+    </section>
+  </main>
+  <script src="/airborne/chart.js" defer></script>
+</body>
+</html>

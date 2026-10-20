@@ -10,12 +10,14 @@ from workers import Response, WorkerEntrypoint
 
 from earth_watch.http_routes import (
     CHART_A_API_PATH,
+    CHART_B_API_PATH,
     HEALTH_API_PATH,
     chart_a_json_response,
+    chart_b_json_response,
     health_json_response,
     is_public_api_path,
 )
-from earth_watch.layout import chart_a_latest_key
+from earth_watch.layout import chart_a_latest_key, chart_b_latest_key
 from earth_watch.run import run_pipeline_to_r2
 from earth_watch.worker_fetch import js_fetch_bytes
 
@@ -36,6 +38,13 @@ class Default(WorkerEntrypoint):
                 return Response("Chart data not available yet", status=404)
             text = await obj.text()
             return chart_a_json_response(json.loads(text))
+
+        if path == CHART_B_API_PATH:
+            obj = await self.env.DATA.get(chart_b_latest_key())
+            if obj is None:
+                return Response("Chart data not available yet", status=404)
+            text = await obj.text()
+            return chart_b_json_response(json.loads(text))
 
         if path == "/run":
             if request.method != "POST":

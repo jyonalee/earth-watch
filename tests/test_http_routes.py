@@ -9,6 +9,7 @@ from earth_watch.http_routes import chart_a_json_body, health_json_body, is_publ
 
 def test_public_api_paths():
     assert is_public_api_path("/api/chart-a.json")
+    assert is_public_api_path("/api/chart-b.json")
     assert is_public_api_path("/api/health")
     assert not is_public_api_path("/run")
 

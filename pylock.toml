@@ -3,6 +3,16 @@ created-by = "uv"
 requires-python = ">=3.14.2"
 
 [[packages]]
+name = "et-xmlfile"
+version = "2.0.0"
+wheels = [{ url = "https://files.pythonhosted.org/packages/c1/8b/5fe2cc11fee489817272089c4203e679c63b570a5aaeb18d852ae3cbba6a/et_xmlfile-2.0.0-py3-none-any.whl", upload-time = 2024-10-25T17:25:39Z, size = 18059, hashes = { sha256 = "7a91720bc756843502c3b7504c77b8fe44217c85c537d85037f0f536151b2caa" } }]
+
+[[packages]]
+name = "openpyxl"
+version = "3.1.5"
+wheels = [{ url = "https://files.pythonhosted.org/packages/c0/da/977ded879c29cbd04de313843e76868e6e13408a94ed6b987245dc7c8506/openpyxl-3.1.5-py2.py3-none-any.whl", upload-time = 2024-06-28T14:03:41Z, size = 250910, hashes = { sha256 = "5282c12b107bffeef825f4617dc029afaf41d0ea60823bbb665ef3079dc79de2" } }]
+
+[[packages]]
 name = "workers-runtime-sdk"
 version = "1.9.4"
 wheels = [{ url = "https://files.pythonhosted.org/packages/ff/0d/e042cc8ac587699e7479db34dee27bd653297d709386b22e926d2672bbc8/workers_runtime_sdk-1.9.4-py3-none-any.whl", upload-time = 2026-10-16T05:13:19Z, size = 39960, hashes = { sha256 = "2bd6f5788fd6fdd38ff677e37c93fd92b37ff3a3ab33b43b7ed84ba50688a647" } }]

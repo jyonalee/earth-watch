@@ -12,7 +12,9 @@ from earth_watch import __version__
 from earth_watch.fetchers import (
     BaseFetcher,
     BerkeleyLandOceanFetcher,
+    GcbBudgetFetcher,
     GistempGlobalFetcher,
+    GmlGlobalGrowthFetcher,
     HadCrut5AnnualFetcher,
     HadCrut5MonthlyFetcher,
     gml_fetchers,
@@ -23,7 +25,7 @@ from earth_watch.layout import (
     aggregate_latest_key,
     fetch_date_from_datetime,
     manifest_run_key,
-    original_filename_from_url,
+    storage_filename_for_spec,
     raw_object_key,
     run_id_from_datetime,
 )
@@ -48,6 +50,8 @@ def default_fetchers() -> list[BaseFetcher]:
         HadCrut5MonthlyFetcher(),
         HadCrut5AnnualFetcher(),
         BerkeleyLandOceanFetcher(),
+        GcbBudgetFetcher(),
+        GmlGlobalGrowthFetcher(),
     ]
 
 
@@ -107,7 +111,7 @@ def run_pipeline(
 
 def _write_source_outputs(output_dir: Path, record: SourceRecord, fetch_date: str) -> None:
     source_id = record.spec.source_id
-    original_name = original_filename_from_url(record.spec.url)
+    original_name = storage_filename_for_spec(record.spec)
     raw_rel = Path("raw") / source_id / fetch_date / original_name
     agg_rel = Path("aggregates") / fetch_date / f"{source_id}.json"
     agg_latest_rel = Path("aggregates") / "latest" / f"{source_id}.json"
@@ -136,7 +140,7 @@ def build_manifest(
     sources = []
     for record in records:
         source_id = record.spec.source_id
-        original_name = original_filename_from_url(record.spec.url)
+        original_name = storage_filename_for_spec(record.spec)
         fetched = record.fetch.fetched_at.replace(microsecond=0).isoformat().replace("+00:00", "Z")
         raw_rel = f"raw/{source_id}/{fetch_date}/{original_name}"
         agg_rel = f"aggregates/{fetch_date}/{source_id}.json"
