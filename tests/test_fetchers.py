@@ -7,7 +7,14 @@ from pathlib import Path
 
 import pytest
 
-from earth_watch.fetchers import GistempGlobalFetcher, GmlCo2Fetcher, SourceValidationError
+from earth_watch.fetchers import (
+    BerkeleyLandOceanFetcher,
+    GistempGlobalFetcher,
+    GmlCo2Fetcher,
+    HadCrut5AnnualFetcher,
+    HadCrut5MonthlyFetcher,
+    SourceValidationError,
+)
 from earth_watch.fetchers.base import FetchResult
 from earth_watch.sources import GML_CO2_ANNMEAN, GML_CO2_GROWTH, GML_CO2_MONTHLY
 
@@ -71,3 +78,24 @@ class TestGistemp:
         )
         with pytest.raises(SourceValidationError, match="title"):
             fetcher.process(bad)
+
+
+class TestHadCrut5:
+    def test_annual_parse(self):
+        fetcher = HadCrut5AnnualFetcher()
+        record = fetcher.process(_fetch_result(fetcher.spec, "hadcrut5_global_annual.csv"))
+        assert record.aggregates["latest_annual"]["year"] >= 2024
+        assert record.aggregates["native_baseline"] == "1961-1990"
+
+    def test_monthly_parse(self):
+        fetcher = HadCrut5MonthlyFetcher()
+        record = fetcher.process(_fetch_result(fetcher.spec, "hadcrut5_global_monthly.csv"))
+        assert record.aggregates["latest_month"]["month"] is not None
+
+
+class TestBerkeley:
+    def test_summary_parse(self):
+        fetcher = BerkeleyLandOceanFetcher()
+        record = fetcher.process(_fetch_result(fetcher.spec, "berkeley_land_ocean_summary.txt"))
+        assert record.aggregates["latest_annual"]["year"] >= 2024
+        assert record.aggregates["native_baseline"] == "1951-1980"

@@ -1,0 +1,48 @@
+:root {
+  color-scheme: light dark;
+  font-family: system-ui, sans-serif;
+  line-height: 1.45;
+}
+
+body {
+  margin: 0 auto;
+  max-width: 52rem;
+  padding: 1rem 1.25rem 2rem;
+}
+
+.crumb {
+  font-size: 0.9rem;
+}
+
+.subtitle {
+  color: #555;
+}
+
+@media (prefers-color-scheme: dark) {
+  .subtitle {
+    color: #aaa;
+  }
+}
+
+.status.error {
+  color: #b00020;
+}
+
+#chart {
+  width: 100%;
+  max-width: 960px;
+  height: auto;
+  border: 1px solid #ccc;
+  background: #fafafa;
+}
+
+@media (prefers-color-scheme: dark) {
+  #chart {
+    background: #111;
+    border-color: #444;
+  }
+}
+
+#sources a {
+  word-break: break-all;
+}
