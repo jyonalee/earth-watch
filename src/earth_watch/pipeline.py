@@ -9,7 +9,8 @@ from pathlib import Path
 from typing import Any, Sequence
 
 from earth_watch import __version__
-from earth_watch.freshness import cadence_for_source
+from earth_watch.fetch_http import normalize_http_last_modified
+from earth_watch.freshness import cadence_for_source, known_lag_for_source
 from earth_watch.source_collect import SourceOutcome, collect_source_outcomes_sync
 from earth_watch.fetchers import (
     BaseFetcher,
@@ -177,8 +178,9 @@ def build_manifest(
             "error": outcome.error,
             "cadence": cadence,
             "last_data_point": last_point,
-            "http_last_modified": outcome.http_last_modified,
+            "http_last_modified": normalize_http_last_modified(outcome.http_last_modified),
             "stale": outcome.stale,
+            "known_lag": known_lag_for_source(source_id),
             "url": outcome.spec.url,
             "version": outcome.spec.version,
             "original_filename": original_name,

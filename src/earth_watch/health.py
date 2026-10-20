@@ -20,13 +20,17 @@ def health_from_manifest(manifest: dict[str, Any] | None) -> dict[str, Any]:
     sources_out: list[dict[str, Any]] = []
     any_stale = False
     any_failed = False
+    actionable_stale = False
     for entry in manifest.get("sources", []):
         status = entry.get("status", "ok")
         stale = bool(entry.get("stale", False))
+        known_lag = bool(entry.get("known_lag", False))
         if status == "failed":
             any_failed = True
         if stale:
             any_stale = True
+            if not known_lag:
+                actionable_stale = True
         sources_out.append(
             {
                 "source_id": entry.get("source_id"),
@@ -35,12 +39,13 @@ def health_from_manifest(manifest: dict[str, Any] | None) -> dict[str, Any]:
                 "last_data_point": entry.get("last_data_point"),
                 "http_last_modified": entry.get("http_last_modified"),
                 "stale": stale,
+                "known_lag": known_lag,
                 "cadence": entry.get("cadence"),
             }
         )
 
     overall = "ok"
-    if any_failed or any_stale:
+    if any_failed or actionable_stale:
         overall = "degraded"
 
     return {

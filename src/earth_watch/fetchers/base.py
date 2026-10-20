@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any
 
+from earth_watch.fetch_http import normalize_http_last_modified
 from earth_watch.net import fetch_bytes_sync
 from earth_watch.sources import SourceSpec
 
@@ -46,7 +47,7 @@ class FetchResult:
             content=content,
             fetched_at=fetched_at,
             sha256=digest,
-            http_last_modified=http_last_modified,
+            http_last_modified=normalize_http_last_modified(http_last_modified),
         )
 
 
