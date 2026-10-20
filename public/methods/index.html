@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Earth Watch — Methods</title>
+  <link rel="stylesheet" href="/warming/styles.css">
+</head>
+<body>
+  <main>
+    <header>
+      <p class="crumb"><a href="/">Earth Watch</a> / Methods</p>
+      <h1>Methods, sources, and limitations</h1>
+      <p class="subtitle">How aggregates are built and what they do not claim.</p>
+    </header>
+
+    <section>
+      <h2>Datasets</h2>
+      <p>Canonical URLs and licenses are listed in <a href="https://github.com/jyonalee/earth-watch/blob/main/docs/sources.md">docs/sources.md</a>. Update frequency is typically monthly or annual per provider; the Worker runs on a <strong>weekly</strong> cron.</p>
+      <ul>
+        <li><strong>Chart (a):</strong> NASA GISTEMP v4, Met Office HadCRUT5.1.0.0, Berkeley Earth land+ocean (HadSST4).</li>
+        <li><strong>Chart (b):</strong> Global Carbon Budget 2025 (pinned download), NOAA GML global CO₂ growth.</li>
+        <li><strong>Chart (c):</strong> NOAA NCEI global ocean heat content (0–700 m, 0–2000 m ASCII), NOAA Climate at a Glance global ocean SST JSON.</li>
+      </ul>
+      <p>Pinned GCB and HadCRUT paths are bumped manually — see <a href="https://github.com/jyonalee/earth-watch/blob/main/docs/maintenance.md">docs/maintenance.md</a>.</p>
+    </section>
+
+    <section>
+      <h2>Baselines</h2>
+      <ul>
+        <li>Chart (a): common <strong>1951–1980</strong> anomaly baseline (native baselines rebased when needed).</li>
+        <li>Chart (c) SST: <strong>1901–2000</strong> (NCEI Climate at a Glance).</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Trends and uncertainty</h2>
+      <p>Linear trends use <strong>ordinary least squares</strong> with <strong>AR(1)-adjusted</strong> 95% confidence intervals (effective <em>n</em> from autocorrelation of residuals). Trend bands on charts show uncertainty in the <em>fitted trend</em>, not year-to-year scatter.</p>
+      <p><strong>Complete calendar years only:</strong> the current UTC year is excluded from trends and “last complete year” labels when monthly coverage is incomplete (HadCRUT, GISTEMP, Berkeley, GCB/GML alignment).</p>
+    </section>
+
+    <section>
+      <h2>Airborne fraction (chart b)</h2>
+      <p>Airborne fraction = atmospheric CO₂ growth (GtC) ÷ (fossil + land-use emissions), using NOAA GML global growth and GCB emissions. CO₂ ppm is converted with <strong>2.124 GtC per ppm</strong> (cited in the chart JSON).</p>
+    </section>
+
+    <section>
+      <h2>Ocean heating rate (chart c)</h2>
+      <p>OHC trend slope (10²² J yr⁻¹) is converted to a global mean heating rate in <strong>W m⁻²</strong> using Earth’s surface area 5.10072×10¹⁴ m² and a tropical year in seconds (see chart JSON citation).</p>
+    </section>
+
+    <section>
+      <h2>Known limitations</h2>
+      <ul>
+        <li><strong>SST is not OISST:</strong> chart (c) uses the official NCEI <em>Climate at a Glance</em> global ocean index, not a gridded OISST area mean (NetCDF is not processed in the Worker).</li>
+        <li><strong>Berkeley Earth</strong> can lag other temperature products by a few months.</li>
+        <li><strong>Land-use emissions</strong> uncertainty dominates airborne-fraction error bars.</li>
+        <li><strong>Health:</strong> external monitors should poll <code>/api/health</code>; the Worker does not send alerts.</li>
+      </ul>
+    </section>
+
+    <nav class="nav">
+      <a href="/warming/">Chart (a)</a> ·
+      <a href="/airborne/">Chart (b)</a> ·
+      <a href="/ocean/">Chart (c)</a>
+    </nav>
+  </main>
+</body>
+</html>

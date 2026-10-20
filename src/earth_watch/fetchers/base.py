@@ -29,11 +29,25 @@ class FetchResult:
     content: bytes
     fetched_at: datetime
     sha256: str
+    http_last_modified: str | None = None
 
     @classmethod
-    def from_bytes(cls, spec: SourceSpec, content: bytes, fetched_at: datetime) -> FetchResult:
+    def from_bytes(
+        cls,
+        spec: SourceSpec,
+        content: bytes,
+        fetched_at: datetime,
+        *,
+        http_last_modified: str | None = None,
+    ) -> FetchResult:
         digest = hashlib.sha256(content).hexdigest()
-        return cls(spec=spec, content=content, fetched_at=fetched_at, sha256=digest)
+        return cls(
+            spec=spec,
+            content=content,
+            fetched_at=fetched_at,
+            sha256=digest,
+            http_last_modified=http_last_modified,
+        )
 
 
 @dataclass(frozen=True, slots=True)

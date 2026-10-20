@@ -15,6 +15,7 @@ from earth_watch.airborne import (
     emissions_sigma_gtc,
     growth_ppm_to_gtc,
 )
+from earth_watch.chart_meta import data_as_of_block
 from earth_watch.constants import PPM_CO2_TO_GTC, PPM_CO2_TO_GTC_CITATION
 from earth_watch.fetchers.base import SourceRecord
 from earth_watch.sources import GCB_GLOBAL_BUDGET_2025, GML_CO2_GR_GLOBAL
@@ -211,6 +212,7 @@ def build_chart_b_payload(
     return {
         "chart": "b_airborne_fraction",
         "last_complete_year": last_complete,
+        "data_as_of": data_as_of_block(last_complete),
         "ppm_to_gtc_factor": PPM_CO2_TO_GTC,
         "ppm_to_gtc_citation": PPM_CO2_TO_GTC_CITATION,
         "smoothing": {"method": "centered_mean", "window_years": SMOOTHING_WINDOW_YEARS},

@@ -96,13 +96,27 @@ NCEI_OHC_0_2000M_YEARLY = SourceSpec(
     version="NCEI global OHC 0-2000 m",
 )
 
+CAG_OCEAN_ANNUAL_START_YEAR = 1980
+
+
+def cag_annual_end_years_to_try(utc_year: int) -> tuple[int, ...]:
+    """Try current UTC year first, then previous (NCEI may lag the annual endpoint)."""
+    return (utc_year, utc_year - 1)
+
+
+def cag_ocean_annual_url(end_year: int) -> str:
+    """Official NCEI Climate at a Glance annual global ocean JSON (YTD month 12)."""
+    return (
+        "https://www.ncei.noaa.gov/access/monitoring/climate-at-a-glance/global/"
+        f"time-series/globe/ocean/ytd/12/{CAG_OCEAN_ANNUAL_START_YEAR}-{end_year}.json"
+    )
+
+
 NCEI_CAG_OCEAN_ANNUAL = SourceSpec(
     source_id="ncei_cag_ocean_sst",
-    url=(
-        "https://www.ncei.noaa.gov/access/monitoring/climate-at-a-glance/global/"
-        "time-series/globe/ocean/ytd/12/1980-2026.json"
-    ),
+    url=cag_ocean_annual_url(2000),
     version="NCEI Climate at a Glance global ocean (annual)",
+    storage_filename="ncei_cag_ocean_annual.json",
 )
 
 M2_TEMPERATURE_SOURCES: tuple[SourceSpec, ...] = (

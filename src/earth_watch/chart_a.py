@@ -18,6 +18,7 @@ from earth_watch.sources import (
     HADCRUT5_GLOBAL_ANNUAL,
     HADCRUT5_GLOBAL_MONTHLY,
 )
+from earth_watch.chart_meta import data_as_of_block
 from earth_watch.trends.ols import (
     TrendFit,
     compare_slopes,
@@ -242,8 +243,10 @@ def build_chart_a_payload(
     if not any_accel:
         read += " With current data, the recent and long-window trend intervals overlap for every series."
 
+    data_year = max(s["last_complete_year"] for s in series_out)
     return {
         "chart": "a_warming",
+        "data_as_of": data_as_of_block(data_year),
         "baseline": {
             "label": COMMON_BASELINE_LABEL,
             "start_year": COMMON_BASELINE_START,

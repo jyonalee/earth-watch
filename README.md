@@ -4,7 +4,7 @@ Personal climate dashboard (Phase 1). Milestone **M1** fetches NOAA GML Mauna Lo
 
 **Runtime:** Python **Worker** on a weekly cron (and optional authenticated `POST /run`). See [docs/deployment.md](docs/deployment.md) for Workers Builds and secrets. M2 design: [docs/m2-design.md](docs/m2-design.md).
 
-Dataset URLs: [docs/sources.md](docs/sources.md). M3: [docs/m3-design.md](docs/m3-design.md). M4: [docs/m4-design.md](docs/m4-design.md).
+Dataset URLs: [docs/sources.md](docs/sources.md). M3: [docs/m3-design.md](docs/m3-design.md). M4: [docs/m4-design.md](docs/m4-design.md). M5: [docs/m5-design.md](docs/m5-design.md). Maintenance: [docs/maintenance.md](docs/maintenance.md).
 
 ## Repository layout
 

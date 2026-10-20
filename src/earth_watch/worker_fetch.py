@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
+from earth_watch.fetch_http import HttpFetchResult
 from earth_watch.fetchers.base import SourceValidationError
 
 
-async def js_fetch_bytes(url: str) -> bytes:
+async def js_fetch_http(url: str) -> HttpFetchResult:
     from asyncio import sleep
     from js import Object, Uint8Array, fetch
 
@@ -17,9 +18,20 @@ async def js_fetch_bytes(url: str) -> bytes:
         if response.ok:
             buffer = await response.arrayBuffer()
             view = Uint8Array.new(buffer)
-            return bytes(view.to_py())
+            last_modified = None
+            try:
+                raw_lm = response.headers.get("Last-Modified")
+                if raw_lm is not None:
+                    last_modified = str(raw_lm)
+            except Exception:
+                last_modified = None
+            return HttpFetchResult(content=bytes(view.to_py()), last_modified=last_modified)
         if last_status == 429 and attempt < 3:
             await sleep(2.0 * (attempt + 1))
             continue
         break
     raise SourceValidationError(f"GET {url} failed: HTTP {last_status}")
+
+
+async def js_fetch_bytes(url: str) -> bytes:
+    return (await js_fetch_http(url)).content

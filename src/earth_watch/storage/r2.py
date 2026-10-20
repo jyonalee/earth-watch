@@ -56,6 +56,25 @@ async def load_latest_manifest(bucket: R2BucketBinding) -> dict[str, Any] | None
     return json.loads(text)
 
 
+async def read_object_bytes(bucket: R2BucketBinding, key: str) -> bytes | None:
+    store = getattr(bucket, "store", None)
+    if isinstance(store, dict) and key in store:
+        value = store[key]
+        return value if isinstance(value, bytes) else str(value).encode("utf-8")
+    obj = await bucket.get(key)
+    if obj is None:
+        return None
+    text = await obj.text()
+    return text.encode("utf-8") if isinstance(text, str) else text
+
+
+async def load_object_bytes(bucket: R2BucketBinding, key: str) -> bytes | None:
+    try:
+        return await read_object_bytes(bucket, key)
+    except Exception:
+        return None
+
+
 def previous_raw_key_by_source(manifest: dict[str, Any] | None) -> dict[str, str]:
     if not manifest:
         return {}
@@ -115,8 +134,12 @@ def plan_r2_uploads(
     items: list[UploadItem] = []
 
     for entry in manifest["sources"]:
+        if entry.get("status") == "failed":
+            continue
         source_id = entry["source_id"]
-        record = by_id[source_id]
+        record = by_id.get(source_id)
+        if record is None:
+            continue
         agg_bytes = aggregate_json_bytes(record)
         skip_raw = bool(entry.get("raw_upload_skipped"))
         items.append(

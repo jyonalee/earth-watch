@@ -5,6 +5,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from typing import Any, Sequence
 
+from earth_watch.chart_meta import data_as_of_block
 from earth_watch.fetchers.base import SourceRecord
 from earth_watch.ocean_physics import (
     HEATING_RATE_CITATION,
@@ -15,6 +16,7 @@ from earth_watch.sources import (
     NCEI_CAG_OCEAN_ANNUAL,
     NCEI_OHC_0_2000M_YEARLY,
     NCEI_OHC_0_700M_YEARLY,
+    cag_ocean_annual_url,
 )
 from earth_watch.trends.ols import TrendFit, compare_slopes, fitted_line_points, linear_trend
 
@@ -235,11 +237,15 @@ def build_chart_c_payload(
             "recent and long-window OHC trend uncertainties overlap, so clear acceleration is not established."
         )
 
+    sst_meta = dict(_SST_META)
+    sst_meta["url"] = cag_ocean_annual_url(run_at.astimezone(timezone.utc).year)
+
     return {
         "chart": "c_ocean_heat",
         "last_complete_year": last_complete,
+        "data_as_of": data_as_of_block(last_complete),
         "heating_rate_citation": HEATING_RATE_CITATION,
-        "sources": [_OHC_700_META, _OHC_2000_META, _SST_META],
+        "sources": [_OHC_700_META, _OHC_2000_META, sst_meta],
         "ohc": {
             "units": "10^22 J",
             "0_700m": {"annual": ohc700, "trends": trend700},
