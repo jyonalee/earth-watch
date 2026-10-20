@@ -96,6 +96,14 @@ def _fit_summary(fit: TrendFit, *, values_are_ohc: bool) -> dict[str, Any]:
     }
     if values_are_ohc:
         out["slope_zj_per_year"] = round(ohc_slope_1e22j_per_year_to_zj_per_year(fit.slope_per_year_c), 4)
+        out["ci95_low_zj_per_year"] = round(
+            ohc_slope_1e22j_per_year_to_zj_per_year(fit.ci95_low_per_decade_c / 10.0),
+            4,
+        )
+        out["ci95_high_zj_per_year"] = round(
+            ohc_slope_1e22j_per_year_to_zj_per_year(fit.ci95_high_per_decade_c / 10.0),
+            4,
+        )
         out["heating_rate_w_m2"] = round(ohc_slope_1e22j_per_year_to_w_m2(fit.slope_per_year_c), 4)
     return out
 
@@ -199,9 +207,9 @@ def build_chart_c_payload(
         (
             f"0–2000 m OHC trend {trend2000['long']['year_start']}–{trend2000['long']['year_end']}: "
             f"{trend2000['long']['slope_zj_per_year']:.2f} ZJ yr⁻¹ "
-            f"({trend2000['long']['heating_rate_w_m2']:.3f} W m⁻²); "
-            f"95% CI on slope {trend2000['long']['ci95_low_per_decade']:.2f} to "
-            f"{trend2000['long']['ci95_high_per_decade']:.2f} (10²² J decade⁻¹)."
+            f"(95% CI {trend2000['long']['ci95_low_zj_per_year']:.2f} to "
+            f"{trend2000['long']['ci95_high_zj_per_year']:.2f} ZJ yr⁻¹), "
+            f"{trend2000['long']['heating_rate_w_m2']:.3f} W m⁻²."
         ),
         (
             f"Global ocean SST anomaly (1901–2000 baseline): latest annual {sst_annual[-1]['anomaly_c']:.2f} °C "
