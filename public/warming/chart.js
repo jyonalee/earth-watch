@@ -106,9 +106,12 @@ function drawChart(canvas, payload) {
 }
 
 function renderLists(payload) {
+  const bandLabel =
+    payload.series[0]?.trend_lines?.band_label ||
+    "95% trend uncertainty (AR(1)-adjusted OLS fit)";
   document.getElementById("baseline-note").textContent =
     `Baseline: ${payload.baseline.label} (${payload.baseline.start_year}–${payload.baseline.end_year}). ` +
-    payload.baseline.method;
+    `${payload.baseline.method} Dashed lines: linear trends since 1970; shaded bands: ${bandLabel}.`;
 
   const facts = document.getElementById("facts");
   facts.replaceChildren(...payload.facts.map((t) => {
@@ -137,7 +140,8 @@ async function main() {
   const status = document.getElementById("status");
   try {
     const data = await loadChartData();
-    status.textContent = `Data as of ${data.series.map((s) => s.data_as_of_year).join(", ")} (per series).`;
+    status.textContent =
+      `Last complete year: ${data.series.map((s) => s.last_complete_year ?? s.data_as_of_year).join(", ")} (per series).`;
     drawChart(document.getElementById("chart"), data);
     renderLists(data);
   } catch (err) {

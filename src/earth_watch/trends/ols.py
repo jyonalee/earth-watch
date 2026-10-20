@@ -20,6 +20,9 @@ class TrendFit:
     ar1_rho: float
     effective_n: float
     residual_std_c: float
+    x_mean: float
+    sxx: float
+    t_critical: float
 
 
 @dataclass(frozen=True, slots=True)
@@ -108,7 +111,36 @@ def linear_trend(years: Sequence[int], values: Sequence[float]) -> TrendFit:
         ar1_rho=rho,
         effective_n=n_eff,
         residual_std_c=residual_std,
+        x_mean=x_mean,
+        sxx=sxx,
+        t_critical=t_crit,
     )
+
+
+def se_fitted_y(fit: TrendFit, year: int) -> float:
+    x = float(year)
+    sigma2 = fit.residual_std_c**2
+    if fit.n <= 0 or fit.sxx <= 0:
+        return 0.0
+    se = math.sqrt(sigma2 * (1.0 / fit.n + (x - fit.x_mean) ** 2 / fit.sxx))
+    return se * math.sqrt(fit.n / fit.effective_n)
+
+
+def fitted_line_points(fit: TrendFit, years: Sequence[int]) -> list[dict[str, float | int | str]]:
+    points: list[dict[str, float | int | str]] = []
+    for y in years:
+        val = fit.intercept_c + fit.slope_per_year_c * y
+        half = fit.t_critical * se_fitted_y(fit, y)
+        points.append(
+            {
+                "year": y,
+                "trend_c": round(val, 4),
+                "band_low_c": round(val - half, 4),
+                "band_high_c": round(val + half, 4),
+                "band_kind": "trend_uncertainty",
+            }
+        )
+    return points
 
 
 def compare_slopes(recent: TrendFit, long: TrendFit) -> SlopeComparison:
