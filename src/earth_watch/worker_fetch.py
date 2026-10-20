@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from earth_watch.fetch_http import HttpFetchResult
+from earth_watch.fetch_http import HttpFetchResult, normalize_http_last_modified
 from earth_watch.fetchers.base import SourceValidationError
 
 
@@ -21,8 +21,7 @@ async def js_fetch_http(url: str) -> HttpFetchResult:
             last_modified = None
             try:
                 raw_lm = response.headers.get("Last-Modified")
-                if raw_lm is not None:
-                    last_modified = str(raw_lm)
+                last_modified = normalize_http_last_modified(raw_lm)
             except Exception:
                 last_modified = None
             return HttpFetchResult(content=bytes(view.to_py()), last_modified=last_modified)

@@ -17,15 +17,19 @@ Other sources use stable canonical URLs (NOAA GML, GISTEMP, NCEI OHC `.dat`, NCE
 
 | Cadence | Threshold | Examples |
 |---------|-----------|----------|
-| `monthly` | 4 months | GML Mauna Loa monthly, HadCRUT5 monthly |
-| `annual` | 20 months | GISTEMP, Berkeley, NCEI OHC, CAG ocean |
+| `monthly` | 4 months | GML Mauna Loa monthly, HadCRUT5 monthly, GISTEMP (last month from table) |
+| `annual` | 20 months | Berkeley, NCEI OHC, CAG ocean |
 | `gcb` | 24 months | Global Carbon Budget XLSX |
 
-Thresholds are defined in `src/earth_watch/freshness.py` (`STALE_THRESHOLD_MONTHS`). A failed fetch in the latest run sets `status: failed`; aggregates for that source are not overwritten.
+Thresholds and per-source flags are defined in `src/earth_watch/freshness.py` (`STALE_THRESHOLD_MONTHS`, `SOURCE_KNOWN_LAG`). A failed fetch in the latest run sets `status: failed`; aggregates for that source are not overwritten.
+
+### Known lag (`known_lag`)
+
+Some public files update slowly even when the pipeline is healthy. Set `known_lag: true` in `SOURCE_KNOWN_LAG` for those sources (currently **Berkeley Earth land+ocean** — the summary file often lags by months). They may still appear with `stale: true` in health, but overall `status` stays **`ok`** when nothing failed and every stale source is `known_lag`. External monitors should alert on `status: degraded` or `any_failed: true`, not on `stale` alone.
 
 ## External monitoring
 
-No alerting is built into the Worker. Poll `GET /api/health` on a schedule outside this repo; treat `stale: true`, `any_failed: true`, or `status: degraded` as signals to investigate.
+No alerting is built into the Worker. Poll `GET /api/health` on a schedule outside this repo; treat `any_failed: true` or `status: degraded` as signals to investigate. `stale: true` with `status: ok` usually means only known-lag sources are behind.
 
 ## After a bump
 
