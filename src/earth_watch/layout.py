@@ -21,6 +21,12 @@ def original_filename_from_url(url: str) -> str:
     return url.rstrip("/").split("/")[-1]
 
 
+def storage_filename_for_spec(spec) -> str:
+    if getattr(spec, "storage_filename", None):
+        return str(spec.storage_filename)
+    return original_filename_from_url(spec.url)
+
+
 def raw_object_key(source_id: str, fetch_date: str, original_filename: str) -> str:
     return f"raw/{source_id}/{fetch_date}/{original_filename}"
 
@@ -46,3 +52,11 @@ def chart_a_latest_key() -> str:
 
 def chart_a_dated_key(fetch_date: str) -> str:
     return f"aggregates/{fetch_date}/chart_a_warming.json"
+
+
+def chart_b_latest_key() -> str:
+    return "aggregates/latest/chart_b_airborne_fraction.json"
+
+
+def chart_b_dated_key(fetch_date: str) -> str:
+    return f"aggregates/{fetch_date}/chart_b_airborne_fraction.json"

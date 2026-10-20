@@ -10,6 +10,7 @@ class SourceSpec:
     source_id: str
     url: str
     version: str | None = None
+    storage_filename: str | None = None
 
 
 GML_CO2_ANNMEAN = SourceSpec(
@@ -62,6 +63,19 @@ M1_SOURCES: tuple[SourceSpec, ...] = (
     GML_CO2_GROWTH,
     GML_CO2_MONTHLY,
     GISTEMP_GLOBAL,
+)
+
+GML_CO2_GR_GLOBAL = SourceSpec(
+    source_id="gml_co2_gr_global",
+    url="https://gml.noaa.gov/webdata/ccgg/trends/co2/co2_gr_gl.txt",
+    version="NOAA GML global annual CO2 increase",
+)
+
+GCB_GLOBAL_BUDGET_2025 = SourceSpec(
+    source_id="gcb_global_budget_2025",
+    url="https://globalcarbonbudget.org/download/2341/",
+    version="Global Carbon Budget 2025",
+    storage_filename="Global_Carbon_Budget_2025.xlsx",
 )
 
 M2_TEMPERATURE_SOURCES: tuple[SourceSpec, ...] = (

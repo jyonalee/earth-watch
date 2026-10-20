@@ -7,6 +7,7 @@ from typing import Any
 
 from earth_watch.fetchers.base import AsyncBytesFetcher
 from earth_watch.chart_a import build_chart_a_payload, chart_a_json_bytes
+from earth_watch.chart_b import build_chart_b_payload, chart_b_json_bytes
 from earth_watch.layout import fetch_date_from_datetime, run_id_from_datetime
 from earth_watch.pipeline import build_manifest, collect_records, default_fetchers
 from earth_watch.storage.r2 import apply_raw_dedup, load_latest_manifest, upload_to_r2
@@ -28,13 +29,16 @@ async def run_pipeline_to_r2(
     )
     previous = await load_latest_manifest(bucket)
     manifest = apply_raw_dedup(manifest, previous)
-    chart_payload = build_chart_a_payload(records)
-    chart_bytes = chart_a_json_bytes(chart_payload)
+    chart_a_payload = build_chart_a_payload(records, run_at=run_at)
+    chart_a_bytes = chart_a_json_bytes(chart_a_payload)
+    chart_b_payload = build_chart_b_payload(records, run_at=run_at)
+    chart_b_bytes = chart_b_json_bytes(chart_b_payload)
     upload_result = await upload_to_r2(
         bucket,
         manifest,
         records,
-        chart_a_bytes=chart_bytes,
+        chart_a_bytes=chart_a_bytes,
+        chart_b_bytes=chart_b_bytes,
         fetch_date=manifest["fetch_date"],
     )
     return {
