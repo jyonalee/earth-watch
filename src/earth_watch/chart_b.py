@@ -22,6 +22,9 @@ from earth_watch.trends.ols import TrendFit, linear_trend
 
 CHART_B_LATEST_KEY = "aggregates/latest/chart_b_airborne_fraction.json"
 TREND_START_YEAR = 1960
+# When 95% CI includes zero but the lower bound is within this many pp/decade of zero,
+# describe a positive central estimate as a hint, not as a clearly flat share.
+_CI_LOWER_NEAR_ZERO_PP = 0.5
 
 _GCB_META = {
     "label": "Global Carbon Budget 2025",
@@ -75,7 +78,15 @@ def _trend_dict(fit: TrendFit) -> dict[str, Any]:
 def _read_from_trend(fit: TrendFit) -> str:
     low = fit.ci95_low_per_decade_c
     high = fit.ci95_high_per_decade_c
+    low_pp = low * 100.0
     if low <= 0 <= high:
+        if fit.slope_per_decade_c > 0 and low_pp >= -_CI_LOWER_NEAR_ZERO_PP:
+            return (
+                "Since 1960 the airborne-fraction trend is uncertain (the 95% confidence interval "
+                "includes zero), but the data hint at a slowly rising share of emissions staying "
+                "in the atmosphere—meaning natural sinks are weakening slightly. This is not yet "
+                "statistically clear."
+            )
         return (
             "The long-term trend in airborne fraction since 1960 is not distinguishable from zero "
             "(95% CI includes zero). Natural sinks are absorbing a roughly constant share of emissions."
@@ -157,11 +168,33 @@ def build_chart_b_payload(
 
     last_complete = years[-1]
     latest = annual_rows[-1]
+    long_term_rows = [r for r in annual_rows if r["year"] >= TREND_START_YEAR]
+    mean_af = sum(r["airborne_fraction"] for r in long_term_rows) / len(long_term_rows)
+    smoothed_latest = None
+    for row in reversed(annual_rows):
+        val = row.get("airborne_fraction_smoothed_10y")
+        if val is not None:
+            smoothed_latest = val
+            break
+
     facts = [
         (
             f"Through complete year {last_complete}, airborne fraction was "
             f"{latest['airborne_fraction']:.1%} "
             f"(±{latest['airborne_fraction_sigma']:.1%} 1σ) using global emissions and NOAA GML growth."
+        ),
+        (
+            f"Long-term context (since {TREND_START_YEAR}): mean airborne fraction "
+            f"{mean_af:.1%}; latest {SMOOTHING_WINDOW_YEARS}-year smoothed value "
+            f"{smoothed_latest:.1%} (through {last_complete})."
+            if smoothed_latest is not None
+            else (
+                f"Long-term context (since {TREND_START_YEAR}): mean airborne fraction {mean_af:.1%}."
+            )
+        ),
+        (
+            "Single years swing widely with El Niño/La Niña and fire seasons—a high year like 2024 "
+            "does not by itself mark a new normal; compare the long-term mean and 10-year smooth."
         ),
         (
             f"Airborne fraction trend since {TREND_START_YEAR}: "
