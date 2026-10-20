@@ -38,3 +38,11 @@ def manifest_run_key(run_id: str) -> str:
 
 
 MANIFEST_LATEST_KEY = "manifests/latest.json"
+
+
+def chart_a_latest_key() -> str:
+    return "aggregates/latest/chart_a_warming.json"
+
+
+def chart_a_dated_key(fetch_date: str) -> str:
+    return f"aggregates/{fetch_date}/chart_a_warming.json"

@@ -1,0 +1,42 @@
+"""HTTP helpers for the Worker (public reads + JSON responses)."""
+
+from __future__ import annotations
+
+import json
+from typing import Any
+
+CHART_A_API_PATH = "/api/chart-a.json"
+HEALTH_API_PATH = "/api/health"
+
+
+def is_public_api_path(path: str) -> bool:
+    return path in {CHART_A_API_PATH, HEALTH_API_PATH}
+
+
+def chart_a_json_body(payload: dict[str, Any]) -> tuple[str, dict[str, str]]:
+    body = json.dumps(payload, separators=(",", ":"))
+    headers = {
+        "Content-Type": "application/json; charset=utf-8",
+        "Cache-Control": "public, max-age=3600",
+    }
+    return body, headers
+
+
+def health_json_body() -> tuple[str, dict[str, str]]:
+    return json.dumps({"status": "ok"}), {
+        "Content-Type": "application/json; charset=utf-8",
+    }
+
+
+def chart_a_json_response(payload: dict[str, Any]):
+    from workers import Response
+
+    body, headers = chart_a_json_body(payload)
+    return Response(body, status=200, headers=headers)
+
+
+def health_json_response():
+    from workers import Response
+
+    body, headers = health_json_body()
+    return Response(body, status=200, headers=headers)

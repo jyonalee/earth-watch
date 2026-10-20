@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Earth Watch — Global warming</title>
+  <link rel="stylesheet" href="/warming/styles.css">
+</head>
+<body>
+  <main>
+    <header>
+      <p class="crumb"><a href="/">Earth Watch</a> / Chart (a)</p>
+      <h1>Is global warming speeding up?</h1>
+      <p class="subtitle">Annual global temperature anomalies on a common 1951–1980 baseline.</p>
+    </header>
+
+    <section id="status" class="status" aria-live="polite">Loading data…</section>
+
+    <figure>
+      <canvas id="chart" width="960" height="480" role="img" aria-label="Global temperature anomalies and linear trends"></canvas>
+      <figcaption id="baseline-note"></figcaption>
+    </figure>
+
+    <section>
+      <h2>Facts</h2>
+      <ul id="facts"></ul>
+    </section>
+
+    <section>
+      <h2>Read</h2>
+      <p id="read"></p>
+    </section>
+
+    <section>
+      <h2>Sources and licenses</h2>
+      <ul id="sources"></ul>
+    </section>
+  </main>
+  <script src="/warming/chart.js" defer></script>
+</body>
+</html>

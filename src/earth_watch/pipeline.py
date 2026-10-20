@@ -9,7 +9,14 @@ from pathlib import Path
 from typing import Any
 
 from earth_watch import __version__
-from earth_watch.fetchers import BaseFetcher, GistempGlobalFetcher, gml_fetchers
+from earth_watch.fetchers import (
+    BaseFetcher,
+    BerkeleyLandOceanFetcher,
+    GistempGlobalFetcher,
+    HadCrut5AnnualFetcher,
+    HadCrut5MonthlyFetcher,
+    gml_fetchers,
+)
 from earth_watch.fetchers.base import AsyncBytesFetcher, BytesFetcher, SourceRecord
 from earth_watch.layout import (
     aggregate_dated_key,
@@ -35,7 +42,13 @@ class PipelineResult:
 
 
 def default_fetchers() -> list[BaseFetcher]:
-    return [*gml_fetchers(), GistempGlobalFetcher()]
+    return [
+        *gml_fetchers(),
+        GistempGlobalFetcher(),
+        HadCrut5MonthlyFetcher(),
+        HadCrut5AnnualFetcher(),
+        BerkeleyLandOceanFetcher(),
+    ]
 
 
 async def collect_records(

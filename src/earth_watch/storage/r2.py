@@ -6,7 +6,7 @@ import json
 from dataclasses import dataclass
 from typing import Any, Protocol
 
-from earth_watch.layout import MANIFEST_LATEST_KEY, manifest_run_key
+from earth_watch.layout import MANIFEST_LATEST_KEY, chart_a_dated_key, chart_a_latest_key, manifest_run_key
 from earth_watch.pipeline import aggregate_json_bytes
 from earth_watch.fetchers.base import SourceRecord
 
@@ -93,7 +93,13 @@ def apply_raw_dedup(manifest: dict[str, Any], previous: dict[str, Any] | None) -
     return result
 
 
-def plan_r2_uploads(manifest: dict[str, Any], records: list[SourceRecord]) -> list[UploadItem]:
+def plan_r2_uploads(
+    manifest: dict[str, Any],
+    records: list[SourceRecord],
+    *,
+    chart_a_bytes: bytes | None = None,
+    fetch_date: str | None = None,
+) -> list[UploadItem]:
     by_id = {record.spec.source_id: record for record in records}
     items: list[UploadItem] = []
 
@@ -140,6 +146,23 @@ def plan_r2_uploads(manifest: dict[str, Any], records: list[SourceRecord]) -> li
             content_type="application/json",
         )
     )
+    if chart_a_bytes is not None:
+        dated = fetch_date or manifest.get("fetch_date", "")
+        items.append(
+            UploadItem(
+                key=chart_a_latest_key(),
+                body=chart_a_bytes,
+                content_type="application/json",
+            )
+        )
+        if dated:
+            items.append(
+                UploadItem(
+                    key=chart_a_dated_key(dated),
+                    body=chart_a_bytes,
+                    content_type="application/json",
+                )
+            )
     return items
 
 
@@ -147,8 +170,16 @@ async def upload_to_r2(
     bucket: R2BucketBinding,
     manifest: dict[str, Any],
     records: list[SourceRecord],
+    *,
+    chart_a_bytes: bytes | None = None,
+    fetch_date: str | None = None,
 ) -> UploadResult:
-    items = plan_r2_uploads(manifest, records)
+    items = plan_r2_uploads(
+        manifest,
+        records,
+        chart_a_bytes=chart_a_bytes,
+        fetch_date=fetch_date,
+    )
     uploaded = 0
     skipped = 0
     for item in items:

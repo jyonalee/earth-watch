@@ -1,8 +1,8 @@
 # Earth Watch
 
-Personal climate dashboard (Phase 1). Milestone **M1** fetches NOAA GML Mauna Loa CO₂ and NASA GISTEMP v4 global temperature, validates schemas and value ranges, and writes JSON aggregates plus manifests to **Cloudflare R2** (`earth-watch`).
+Personal climate dashboard (Phase 1). Milestone **M1** fetches NOAA GML Mauna Loa CO₂ and NASA GISTEMP v4 global temperature; **M2** adds HadCRUT5, Berkeley Earth, warming trends, and chart (a) with public `GET /api/chart-a.json` plus a static dashboard at `/warming/`.
 
-**Runtime:** Python **Worker** on a weekly cron (and optional authenticated `POST /run`). See [docs/deployment.md](docs/deployment.md) for Workers Builds and secrets.
+**Runtime:** Python **Worker** on a weekly cron (and optional authenticated `POST /run`). See [docs/deployment.md](docs/deployment.md) for Workers Builds and secrets. M2 design: [docs/m2-design.md](docs/m2-design.md).
 
 Dataset URLs and GISTEMP uncertainty: [docs/sources.md](docs/sources.md).
 
@@ -11,7 +11,8 @@ Dataset URLs and GISTEMP uncertainty: [docs/sources.md](docs/sources.md).
 | Path | Role |
 |------|------|
 | `src/earth_watch/` | Shared pipeline (fetch, validate, aggregate, R2 layout) — stdlib only |
-| `src/entry.py` | Cloudflare Worker entry (`scheduled` + `/run`) |
+| `src/entry.py` | Cloudflare Worker entry (`scheduled`, public reads, `/run`) |
+| `public/` | Static dashboard assets (Workers `ASSETS` binding) |
 | `wrangler.jsonc` | Worker name, cron, R2 binding, CPU limit |
 | `tests/` | Offline pytest (fixtures + mocked R2 binding) |
 

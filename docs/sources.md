@@ -40,6 +40,23 @@ GISTEMP’s main temperature table does **not** ship per-month uncertainty colum
 
 For Earth Watch chart (a) in M2+, plan to use **KeySeries** (or HadCRUT’s built-in limits) rather than the stale `totalCI_ERA.csv` alone.
 
+## Met Office HadCRUT5 — global temperature (M2)
+
+| Series | URL | Format |
+|--------|-----|--------|
+| Global monthly (with 95% limits) | https://www.metoffice.gov.uk/hadobs/hadcrut5/data/HadCRUT.5.1.0.0/analysis/diagnostics/HadCRUT.5.1.0.0.analysis.summary_series.global.monthly.csv | CSV: `Time` (`YYYY-MM`), anomaly °C, lower/upper 95% |
+| Global annual | https://www.metoffice.gov.uk/hadobs/hadcrut5/data/HadCRUT.5.1.0.0/analysis/diagnostics/HadCRUT.5.1.0.0.analysis.summary_series.global.annual.csv | CSV: `Time` (year), anomaly °C, lower/upper 95% |
+
+Version label: **HadCRUT.5.1.0.0**. Native anomalies vs **1961–1990**; chart (a) re-baselines to **1951–1980**. Licence: [Open Government Licence v3.0](https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/).
+
+## Berkeley Earth — land + ocean (M2)
+
+| Series | URL | Format |
+|--------|-----|--------|
+| Global summary | https://berkeley-earth-temperature.s3.us-west-1.amazonaws.com/Global/Land_and_Ocean_summary.txt | Comment header (`%`), then whitespace table; annual anomaly vs **1951–1980** (air above sea ice column) |
+
+Citation: Rohde & Hausfather, ESSD 2020 (see file header). Data use terms: https://berkeleyearth.org/data/
+
 ## R2 object layout (M1 pipeline)
 
 Bucket: **`earth-watch`** (private). The **Python Worker** writes via an **R2 binding** (`DATA` → `earth-watch`); no S3 API keys in GitHub or Wrangler.
