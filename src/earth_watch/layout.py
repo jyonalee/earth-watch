@@ -60,3 +60,11 @@ def chart_b_latest_key() -> str:
 
 def chart_b_dated_key(fetch_date: str) -> str:
     return f"aggregates/{fetch_date}/chart_b_airborne_fraction.json"
+
+
+def chart_c_latest_key() -> str:
+    return "aggregates/latest/chart_c_ocean_heat.json"
+
+
+def chart_c_dated_key(fetch_date: str) -> str:
+    return f"aggregates/{fetch_date}/chart_c_ocean_heat.json"

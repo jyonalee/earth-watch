@@ -78,6 +78,33 @@ GCB_GLOBAL_BUDGET_2025 = SourceSpec(
     storage_filename="Global_Carbon_Budget_2025.xlsx",
 )
 
+NCEI_OHC_0_700M_YEARLY = SourceSpec(
+    source_id="ncei_ohc_0_700m_yearly",
+    url=(
+        "https://www.ncei.noaa.gov/data/oceans/woa/DATA_ANALYSIS/3M_HEAT_CONTENT/DATA/"
+        "basin/yearly/h22-w0-700m.dat"
+    ),
+    version="NCEI global OHC 0-700 m",
+)
+
+NCEI_OHC_0_2000M_YEARLY = SourceSpec(
+    source_id="ncei_ohc_0_2000m_yearly",
+    url=(
+        "https://www.ncei.noaa.gov/data/oceans/woa/DATA_ANALYSIS/3M_HEAT_CONTENT/DATA/"
+        "basin/yearly/h22-w0-2000m.dat"
+    ),
+    version="NCEI global OHC 0-2000 m",
+)
+
+NCEI_CAG_OCEAN_ANNUAL = SourceSpec(
+    source_id="ncei_cag_ocean_sst",
+    url=(
+        "https://www.ncei.noaa.gov/access/monitoring/climate-at-a-glance/global/"
+        "time-series/globe/ocean/ytd/12/1980-2026.json"
+    ),
+    version="NCEI Climate at a Glance global ocean (annual)",
+)
+
 M2_TEMPERATURE_SOURCES: tuple[SourceSpec, ...] = (
     GISTEMP_GLOBAL,
     HADCRUT5_GLOBAL_MONTHLY,

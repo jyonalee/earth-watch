@@ -17,6 +17,8 @@ from earth_watch.fetchers import (
     GmlGlobalGrowthFetcher,
     HadCrut5AnnualFetcher,
     HadCrut5MonthlyFetcher,
+    NceiCagOceanSstFetcher,
+    NceiOhcFetcher,
     gml_fetchers,
 )
 from earth_watch.fetchers.base import AsyncBytesFetcher, BytesFetcher, SourceRecord
@@ -52,6 +54,9 @@ def default_fetchers() -> list[BaseFetcher]:
         BerkeleyLandOceanFetcher(),
         GcbBudgetFetcher(),
         GmlGlobalGrowthFetcher(),
+        NceiOhcFetcher("0-700m"),
+        NceiOhcFetcher("0-2000m"),
+        NceiCagOceanSstFetcher(),
     ]
 
 

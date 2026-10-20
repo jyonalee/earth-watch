@@ -7,11 +7,12 @@ from typing import Any
 
 CHART_A_API_PATH = "/api/chart-a.json"
 CHART_B_API_PATH = "/api/chart-b.json"
+CHART_C_API_PATH = "/api/chart-c.json"
 HEALTH_API_PATH = "/api/health"
 
 
 def is_public_api_path(path: str) -> bool:
-    return path in {CHART_A_API_PATH, CHART_B_API_PATH, HEALTH_API_PATH}
+    return path in {CHART_A_API_PATH, CHART_B_API_PATH, CHART_C_API_PATH, HEALTH_API_PATH}
 
 
 def chart_json_body(payload: dict[str, Any]) -> tuple[str, dict[str, str]]:
@@ -28,6 +29,10 @@ def chart_a_json_body(payload: dict[str, Any]) -> tuple[str, dict[str, str]]:
 
 
 def chart_b_json_body(payload: dict[str, Any]) -> tuple[str, dict[str, str]]:
+    return chart_json_body(payload)
+
+
+def chart_c_json_body(payload: dict[str, Any]) -> tuple[str, dict[str, str]]:
     return chart_json_body(payload)
 
 
@@ -55,4 +60,11 @@ def chart_b_json_response(payload: dict[str, Any]):
     from workers import Response
 
     body, headers = chart_b_json_body(payload)
+    return Response(body, status=200, headers=headers)
+
+
+def chart_c_json_response(payload: dict[str, Any]):
+    from workers import Response
+
+    body, headers = chart_c_json_body(payload)
     return Response(body, status=200, headers=headers)

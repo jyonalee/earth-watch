@@ -12,6 +12,8 @@ from earth_watch.layout import (
     chart_a_latest_key,
     chart_b_dated_key,
     chart_b_latest_key,
+    chart_c_dated_key,
+    chart_c_latest_key,
     manifest_run_key,
 )
 from earth_watch.pipeline import aggregate_json_bytes
@@ -106,6 +108,7 @@ def plan_r2_uploads(
     *,
     chart_a_bytes: bytes | None = None,
     chart_b_bytes: bytes | None = None,
+    chart_c_bytes: bytes | None = None,
     fetch_date: str | None = None,
 ) -> list[UploadItem]:
     by_id = {record.spec.source_id: record for record in records}
@@ -188,6 +191,23 @@ def plan_r2_uploads(
                     content_type="application/json",
                 )
             )
+    if chart_c_bytes is not None:
+        dated = fetch_date or manifest.get("fetch_date", "")
+        items.append(
+            UploadItem(
+                key=chart_c_latest_key(),
+                body=chart_c_bytes,
+                content_type="application/json",
+            )
+        )
+        if dated:
+            items.append(
+                UploadItem(
+                    key=chart_c_dated_key(dated),
+                    body=chart_c_bytes,
+                    content_type="application/json",
+                )
+            )
     return items
 
 
@@ -198,6 +218,7 @@ async def upload_to_r2(
     *,
     chart_a_bytes: bytes | None = None,
     chart_b_bytes: bytes | None = None,
+    chart_c_bytes: bytes | None = None,
     fetch_date: str | None = None,
 ) -> UploadResult:
     items = plan_r2_uploads(
@@ -205,6 +226,7 @@ async def upload_to_r2(
         records,
         chart_a_bytes=chart_a_bytes,
         chart_b_bytes=chart_b_bytes,
+        chart_c_bytes=chart_c_bytes,
         fetch_date=fetch_date,
     )
     uploaded = 0
